@@ -9,7 +9,8 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 
-#define PIPE_BUF 512
+#define PIPE_BUF 4096
+#define SERVER_NAME "commandserver"
 
 char* token[PIPE_BUF];
 char* req[PIPE_BUF];
@@ -51,13 +52,13 @@ int main()
     int len, id;
 
     fp = fopen("serverfifo.dat", "w");
-    fprintf(fp, "myfifo");
+    fprintf(fp, SERVER_NAME);
     printf("serverfifo.dat file has been created by server\n");
     fclose(fp);
 
     // Creating the named file(FIFO)
     // mkfifo(<pathname>, <permission>)
-    mkfifo("myfifo", 0666);
+    mkfifo(SERVER_NAME, 0666);
 
     char arr1[PIPE_BUF];
     while (1)
@@ -65,14 +66,10 @@ int main()
 
         // Open FIFO for Read only
         fprintf(stdout,"[%d]$ ",getpid());
-        fd = open("myfifo", O_RDONLY);
+        fd = open(SERVER_NAME, O_RDONLY);
 
         // Read from FIFO
         read(fd, arr1, sizeof(arr1));
-
-        // Print the read message
-        printf("Request Item : %s\n", arr1);
-
         close(fd);
 
 
@@ -94,24 +91,23 @@ int main()
             req[id]=NULL;
 
         parseRequest(arr1);
+
+
+        // Print the read message
+        printf("From Client [%s], Request Item : %s\n", req[0],req[1]);
+
         parse(req[1]);
+
 
         char client[80];
         strcpy(client,"client");
         strcat(client,req[0]);
 
-        printf("client fifo: %s\n",client );
+        printf("\nclient fifo: %s\n",client );
 
         k = fork();
         if(k==0){
 
-            for(id=0;token[id]!=NULL;id++)
-                printf("%s ",token[id]);
-
-            for(id=0;req[id]!=NULL;id++)
-                printf("%s ",req[id]);
-
-            printf("heyyyy ");
             // child code
             mkfifo(client, 0666);
             int file_desc = open(client,O_WRONLY);
@@ -121,6 +117,7 @@ int main()
             
             // here the newfd is the file descriptor of stdout (i.e. 1)
             dup2(file_desc,1) ; 
+            close(file_desc);
             if(execvp(req[1],token) == -1)
             {
                 fprintf(stderr, "%s\n", "server can't process the request");

@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define PIPE_BUF 512
+#define PIPE_BUF 4096
 
 int main()
 {
@@ -22,7 +22,7 @@ int main()
     if( access( fname, F_OK ) == 0 ) {
         fp = fopen( fname, "r");
         fscanf(fp, "%s", buff);
-        printf("fifo name : %s\n", buff );
+        printf("found server fifo name : %s\n", buff );
         int fd1;
 
         
@@ -56,10 +56,18 @@ int main()
 
                 mkfifo(client, 0666);
                 int file_desc = open(client,O_RDONLY);
-          
+
+                // clear the buffer 
+                bzero(str2, PIPE_BUF);
+
                 read(file_desc, str2, sizeof(str2));
+                int l2=strlen(str2);
+		        str2[l2-1]='\0';
                 printf("Result : %s\n", str2);
+                
                 close(file_desc);
+
+                printf("\n\n******** Request Completed*********\n");
             }
             else{
                 fprintf(stderr,"%s","Processing limit crosses\n");
