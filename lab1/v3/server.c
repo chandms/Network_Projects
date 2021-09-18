@@ -8,40 +8,14 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include "parser.h"
 
 #define PIPE_BUF 4096
 #define SERVER_NAME "commandserver"
 
-char* token[PIPE_BUF];
-char* req[PIPE_BUF];
+extern char* token[PIPE_BUF];
+extern char* req[PIPE_BUF];
 
-void parseRequest(char buf[PIPE_BUF]){
-    char s[2]="\n";
-
-    int i=0;
-    req[0]=strtok(buf,s);
-
-    while(req[i]!=NULL){
-       // printf(" %s\n",token[i]);
-        i++;
-        req[i]=strtok(NULL, s);
-    }
-}
-
-void  parse(char buf[PIPE_BUF]){
-    char s[2]=" ";
-
-    int i=0;
-    token[0]=strtok(buf,s);
-
-    while(token[i]!=NULL){
-       // printf(" %s\n",token[i]);
-        i++;
-        token[i]=strtok(NULL, s);
-    }
-    
-    //printf("done\n");
-}
 
 int main()
 {

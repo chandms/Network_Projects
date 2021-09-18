@@ -37,9 +37,7 @@ int main()
 
             char req[PIPE_BUF];
 
-            // Now open in write mode and write
-            // string taken from user.
-            
+            fprintf(stdout, "%s", "> ");
             fgets(str, sizeof str, stdin);
             if(str[strlen(str)-1] == '\n'){
                 asprintf(&num, "%d", cpid);
