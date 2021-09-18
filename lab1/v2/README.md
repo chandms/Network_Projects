@@ -10,6 +10,6 @@ Files :
 	server writes the fifo name in the above mentioned file.
 	server reads requests from clients and execute execvp and shows the output on server terminal.
 
-	4. client.c : It has main function which first 	 tries to read the serverfifo.dat, if 				not available, prints error to stdout, exits.If client reads the fifo name, it gets commandline input from user and writes the command to fifo.
+	4. client.c : It has main function which first 	 tries to read the serverfifo.dat, if not available then prints error to stdout, exits.If client reads the fifo name, it gets commandline input from user and writes the command to fifo.
 
 	5. makefile : It has all the commands to generate commandclient.bin, commandserver.bin
