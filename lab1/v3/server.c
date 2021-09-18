@@ -83,7 +83,11 @@ int main()
 
             // opening the client fifo
             int file_desc = open(client,O_WRONLY);
-
+            if(file_desc==-1){
+                // client fifo is not open, then will server other clients.
+                printf("client fifo [%s] is not yet open\n so, will work on different request\n", client);
+                continue;
+            }
             // pointing to client descriptor now
             dup2(file_desc,1) ; 
             close(file_desc);

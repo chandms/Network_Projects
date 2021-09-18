@@ -53,6 +53,10 @@ int main()
 
                 // open server fifo
                 fd1 = open(buff,O_WRONLY);
+                if(fd1==-1){
+                    printf("%s\n","server fifo is not yet open" );
+                    return 1;
+                }
                 write(fd1, req, strlen(req)+1);
                 close(fd1);
 
