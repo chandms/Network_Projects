@@ -17,16 +17,12 @@ int main()
 
     char *fname = "serverfifo.dat";
 
+    // checking if client can access serverfifo.dat
     if( access( fname, F_OK ) == 0 ) {
         fp = fopen( fname, "r");
         fscanf(fp, "%s", buff);
         printf("fifo name : %s\n", buff );
         int fd1;
-
-        
-        // Creating the named file(FIFO)
-        // mkfifo(<pathname>,<permission>)
-        mkfifo(buff, 0666);
 
         char str[PIPE_BUF];
         while (1)
@@ -38,6 +34,10 @@ int main()
             fgets(str, sizeof str, stdin);
             if(str[strlen(str)-1] == '\n'){
                 fd1 = open(buff,O_WRONLY);
+                if(fd1==-1){
+                    fprintf(stderr, "%s\n", "fifo is not yet created by server");
+                    return 1;
+                }
                 write(fd1, str, strlen(str)+1);
                 close(fd1);
             }
@@ -48,6 +48,7 @@ int main()
         }
     }
     else{
+        // serverfifo.dat is not created
         fprintf(stderr,"%s","serverfifo.dat file does not exist \n");
     }
     return 0;
