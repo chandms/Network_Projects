@@ -1,4 +1,3 @@
-// Simple shell example using fork() and execlp().
 
 #include <stdio.h>
 #include <unistd.h>
@@ -7,8 +6,9 @@
 #include <string.h>
 #include "parser.h"
 
-
+// shared among simsh1.c, parser.c and parser.h
 extern char* token[100];
+
 int main(int argc,char* argv[])
 {
 pid_t k;
@@ -19,7 +19,7 @@ int len;
   while(1) {
 
 	
-  	fprintf(stdout,"[%d]$ ",getpid());
+  fprintf(stdout,"[%d]$ ",getpid());
 
 	// read command from stdin
 	fgets(buf, 100, stdin);
@@ -28,13 +28,14 @@ int len;
 	  continue;
 	buf[len-1] = '\0';
 
+  // calling parse function from parser.h
 	parse(buf);
 
   	k = fork();
   	if (k==0) {
   	// child code
     	  if(execvp(token[0],token) == -1)	// if execution failed, terminate child
-	  	exit(1);
+	  	    exit(1);
   	}
   	else {
   	// parent code 
@@ -42,4 +43,6 @@ int len;
   	}
 
   }
+
+  return 0;
 }
