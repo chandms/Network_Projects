@@ -4,10 +4,8 @@
 
 char* token[PIPE_BUF];
 char* req[PIPE_BUF];
-void parseComArg(int argc,char* argv[]);
 
-void parse(char buf[PIPE_BUF]);
-
-void parseRequest(char buf[PIPE_BUF]);
+// to parse commandline input
+void parse(char buf[PIPE_BUF], char delimiter[2]);
 
 #endif

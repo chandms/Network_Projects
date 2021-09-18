@@ -30,8 +30,7 @@ int main()
     printf("serverfifo.dat file has been created by server\n");
     fclose(fp);
 
-    // Creating the named file(FIFO)
-    // mkfifo(<pathname>, <permission>)
+    // Creating the named file(FIFO) - server fifo
     mkfifo(SERVER_NAME, 0666);
 
     char arr1[PIPE_BUF];
@@ -64,34 +63,31 @@ int main()
         for(id=0;req[id]!=NULL;id++)
             req[id]=NULL;
 
-        parseRequest(arr1);
+        parse(arr1,"\n");
 
 
         // Print the read message
         printf("From Client [%s], Request Item : %s\n", req[0],req[1]);
 
-        parse(req[1]);
+        parse(req[1]," ");
 
 
         char client[80];
         strcpy(client,"client");
         strcat(client,req[0]);
 
-        printf("\nclient fifo: %s\n",client );
+        printf("client fifo: %s\n\n",client );
 
         k = fork();
         if(k==0){
 
-            // child code
-            mkfifo(client, 0666);
+            // opening the client fifo
             int file_desc = open(client,O_WRONLY);
 
-            
-
-            
-            // here the newfd is the file descriptor of stdout (i.e. 1)
+            // pointing to client descriptor now
             dup2(file_desc,1) ; 
             close(file_desc);
+            
             if(execvp(req[1],token) == -1)
             {
                 fprintf(stderr, "%s\n", "server can't process the request");

@@ -24,40 +24,42 @@ int main()
         fscanf(fp, "%s", buff);
         printf("found server fifo name : %s\n", buff );
         int fd1;
+        cpid = getpid();
+        asprintf(&num, "%d", cpid);
 
-        
-        // Creating the named file(FIFO)
-        // mkfifo(<pathname>,<permission>)
-        mkfifo(buff, 0666);
+        char client[80];
+        strcpy(client,"client");
+        strcat(client,num);
+        // create client specific fifo
+        mkfifo(client, 0666);
 
         while (1)
         {
             char str[PIPE_BUF], str2[PIPE_BUF];
-            cpid = getpid();
-
+            
+            // req to submit to server
             char req[PIPE_BUF];
 
             fprintf(stdout, "%s", "> ");
             fgets(str, sizeof str, stdin);
             if(str[strlen(str)-1] == '\n'){
-                asprintf(&num, "%d", cpid);
+                
+                // appending clientid in req
                 strcat(strcpy(req,num),"\n");
+                // appending user command 
                 strcat(req,str);
 
+                
+
+                // open server fifo
                 fd1 = open(buff,O_WRONLY);
                 write(fd1, req, strlen(req)+1);
                 close(fd1);
 
-                char client[80];
-                strcpy(client,"client");
-                strcat(client,num);
-
-                mkfifo(client, 0666);
-                int file_desc = open(client,O_RDONLY);
-
                 // clear the buffer 
                 bzero(str2, PIPE_BUF);
-
+                int file_desc = open(client,O_RDONLY);
+                // wait for server response
                 read(file_desc, str2, sizeof(str2));
                 int l2=strlen(str2);
 		        str2[l2-1]='\0';
