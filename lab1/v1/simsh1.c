@@ -5,23 +5,11 @@
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <string.h>
+#include "parser.h"
 
-char* token[100];
-void  parse(char buf[100]){
-	char s[2]=" ";
 
-	int i=0;
-	token[0]=strtok(buf,s);
-
-	while(token[i]!=NULL){
-	   // printf(" %s\n",token[i]);
-	    i++;
-	    token[i]=strtok(NULL, s);
-	}
-	
-	//printf("done\n");
-}
-int main(void)
+extern char* token[100];
+int main(int argc,char* argv[])
 {
 pid_t k;
 char buf[100];
@@ -30,8 +18,7 @@ int len;
 
   while(1) {
 
-	//printf("hiiiii in ");
-	// print prompt
+	
   	fprintf(stdout,"[%d]$ ",getpid());
 
 	// read command from stdin
@@ -40,16 +27,19 @@ int len;
 	if(len == 1) 				// only return key pressed
 	  continue;
 	buf[len-1] = '\0';
+
 	parse(buf);
+
   	k = fork();
   	if (k==0) {
   	// child code
-    	  if(execvp(buf,token) == -1)	// if execution failed, terminate child
+    	  if(execvp(token[0],token) == -1)	// if execution failed, terminate child
 	  	exit(1);
   	}
   	else {
   	// parent code 
 	  waitpid(k, &status, 0);
   	}
+
   }
 }
