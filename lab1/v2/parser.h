@@ -5,6 +5,6 @@
 char* token[PIPE_BUF];
 void parseComArg(int argc,char* argv[]);
 
-void  parse(char buf[100]);
+void  parse(char buf[PIPE_BUF]);
 
 #endif
