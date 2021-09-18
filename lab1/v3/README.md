@@ -14,10 +14,8 @@ Files :
 
 	4. client.c : It has main function which first tries to read the serverfifo.dat.
 	if not available, prints error to stdout.
-
 	If client reads the fifo name, it gets commandline input from user and writes the command to fifo.
-
 	client waits for the reponse from server.
-	clients reads the response written by server in the specific client fifo.
+	clients reads the response written by server in the specific client fifo, and writes the output.
 
 	5. makefile : It has all the commands to generate commandclient.bin, commandserver.bin
