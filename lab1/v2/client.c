@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#define PIPE_BUF 512
+#define PIPE_BUF 4096
 
 int main()
 {

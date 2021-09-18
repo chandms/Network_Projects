@@ -8,24 +8,11 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include "parser.h"
 
-#define PIPE_BUF 512
+#define PIPE_BUF 4096
 
-char* token[PIPE_BUF];
-void  parse(char buf[PIPE_BUF]){
-    char s[2]=" ";
-
-    int i=0;
-    token[0]=strtok(buf,s);
-
-    while(token[i]!=NULL){
-       // printf(" %s\n",token[i]);
-        i++;
-        token[i]=strtok(NULL, s);
-    }
-    
-    //printf("done\n");
-}
+extern char* token[PIPE_BUF];
 
 int main()
 {
@@ -70,7 +57,7 @@ int main()
         k = fork();
         if(k==0){
             // child code
-            if(execvp(arr1,token) == -1)
+            if(execvp(token[0],token) == -1)
             {
                 fprintf(stderr, "%s\n", "server can't process the request");
                 exit(1);
