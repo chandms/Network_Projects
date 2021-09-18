@@ -3,8 +3,7 @@
 
 
 char* token[100];
-void parseComArg(int argc,char* argv[]);
-
+// to parse command line argument
 void  parse(char buf[100]);
 
 #endif
