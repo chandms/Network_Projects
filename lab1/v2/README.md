@@ -14,5 +14,4 @@ Files :
 
 	If client reads the fifo name, it gets commandline input from user and writes the command to fifo.
 
-	5. makefile : It has all the commands to generate 
-				   commandclient.bin, commandserver.bin
+	5. makefile : It has all the commands to generate commandclient.bin, commandserver.bin
