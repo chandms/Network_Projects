@@ -34,7 +34,7 @@ int main()
 
             // Now open in write mode and write
             // string taken from user.
-            
+            fprintf(stdout, "%s", "> ");
             fgets(str, sizeof str, stdin);
             if(str[strlen(str)-1] == '\n'){
                 fd1 = open(buff,O_WRONLY);
