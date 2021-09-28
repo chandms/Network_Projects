@@ -7,8 +7,26 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <time.h>
+#include<signal.h>
 
 #define BUF_SIZE 1000
+
+union
+{
+    uint32_t integer;
+    unsigned char byte[4];
+} conv;
+
+union
+{
+    uint32_t integer;
+    unsigned char byte[1];
+} com;
+
+void term_prog (int sig) {
+	printf("didn't recieve the response from server\n");
+    kill (0,SIGTERM);
+}
 
 int main(int argc, char* argv[]){
 
@@ -23,8 +41,9 @@ int main(int argc, char* argv[]){
     ssize_t read;
     char delim[2]=",";
     char* token[4];
-    int lc=0;
+    int lc=0,pc=0;
     time_t time1,time2;
+    
 
 	fp = fopen("pingparam.dat","r");
 	if(fp==NULL){
@@ -48,8 +67,6 @@ int main(int argc, char* argv[]){
 
     }
 
-    printf("%s\n", "done");
-
     fclose(fp);
 
     int n=atoi(token[0]);
@@ -57,12 +74,17 @@ int main(int argc, char* argv[]){
     int d=atoi(token[2]);
     int s=atoi(token[3]);
 
-    printf("%d,%d,%d,%d\n",n,t,d,s );
+    printf("Read: N =%d, T= %d, D= %d, S= %d\n",n,t,d,s );
     int sock_descriptor;
 	char server_message[BUF_SIZE];
 	struct sockaddr_in server_addr;
 	socklen_t server_struct_length;
 	int port;
+
+
+
+
+
 
 	port = atoi(argv[3]);
 	server_struct_length = sizeof(server_addr);
@@ -78,37 +100,44 @@ int main(int argc, char* argv[]){
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = inet_addr(argv[2]);
-    char client_message[1000];
     for(lc=0; lc<n; lc++){
 
+
+    	// Converting int to byte 
+    	conv.integer = s;
+		com.integer = d;
+		unsigned char client_message[5];
+		for(pc=0;pc<4;pc++)
+			client_message[pc]=conv.byte[pc];
+
+		client_message[pc]=com.byte[0];
+
+
+		
     	memset(server_message, '\0', sizeof(server_message));
-    	memset(client_message, '\0', sizeof(client_message));
     	
-    	char mid[1000];
-    	char command[100];
-    	sprintf(mid, "%d", s);
-    	strcpy(client_message,mid);
-    	sprintf(command,"%d",d);
-    	strcat(client_message," ");
-    	strcat(client_message,command);
 
     	
     	time1 = time(NULL);
     	printf("time1 %ld\n", time1);
     	// Send the message to server:
     	// 
-    	printf("client_message %s\n",client_message );
-	    if(sendto(sock_descriptor, client_message, strlen(client_message), 0,
+    	
+	    if(sendto(sock_descriptor, client_message, sizeof(client_message), 0,
 	         (struct sockaddr*)&server_addr, sizeof(server_addr)) < 0){
 	        printf("Unable to send message\n");
 	        return -1;
 	    }
+	    printf("Client sent %d,%d\n", s,d);
 
-	    printf("%s\n", "client sent message");
+	    if(lc+1==n){
+	    	signal(SIGALRM, term_prog);
+	    	alarm(10);
+	    }
 
 	    if(recvfrom(sock_descriptor, server_message, sizeof(server_message), 0,
 	         (struct sockaddr*)&server_addr, &server_struct_length) < 0){
-	        printf("Error while receiving server's msg\n");
+	        printf("Error while receiving server's message\n");
 	        return -1;
 	    }
 
@@ -121,11 +150,14 @@ int main(int argc, char* argv[]){
 
 
 	    printf("Received from server : %s\n",server_message );
-	    printf("sleeping for %d seconds\n",t );
-
-	    printf("\n\n RTT = %d\n", diff);
-	    printf("*******************\n\n\n");
-	    sleep(t);
+	    printf("################## RTT = %d\n", diff);
+	    
+	    if(lc+1<n)
+	    {
+	    	printf("sleeping for %d seconds before sending the next request\n",t );
+	    	printf("*******************\n\n\n");
+	    	sleep(t);
+	    }
     }
     
 

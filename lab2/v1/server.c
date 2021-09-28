@@ -7,6 +7,18 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+union
+{
+    uint32_t integer;
+    unsigned char byte[4];
+} conv;
+
+union
+{
+    uint32_t integer;
+    unsigned char byte[1];
+} com;
+
 int main(int argc, char* argv[]){
 	if(argc<3){
 		printf("%s\n","please provide all the inputs");
@@ -15,7 +27,10 @@ int main(int argc, char* argv[]){
 	
 	int id=0;
 	int port = atoi(argv[2]);
-	char client_message[1000], server_message[1000];
+	char server_message[1000];
+	unsigned char client_message[5];
+	pid_t frk;
+	int status;
 
 	int sock_descriptor;
 	struct sockaddr_in server_addr, client_addr;
@@ -42,8 +57,9 @@ int main(int argc, char* argv[]){
     printf("%s\n", "binding done");
 
     while(1){
+
+    	
     	memset(server_message, '\0', sizeof(server_message));
-    	memset(client_message, '\0', sizeof(client_message));
 
 	    if (recvfrom(sock_descriptor, client_message, sizeof(client_message), 0,
 	         (struct sockaddr*)&client_addr, &client_struct_length) < 0){
@@ -53,19 +69,13 @@ int main(int argc, char* argv[]){
 
 	    printf("Received message from IP: %s and port: %i\n",
 	           inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+
+	    // Converting byte to int 
+		uint32_t myInt1 = client_message[0] + (client_message[1] << 8) + (client_message[2] << 16) + (client_message[3] << 24);
+	    printf("Message from client = %d\n",myInt1 );
+	    uint32_t command = client_message[4];
+	    printf("Obtained command = %d\n", command);
 	    
-	    printf("Msg from client: %s\n", client_message);
-
-	    char* token[2];
-	    char delim[2]=" ";
-
-	    token[0]=strtok(client_message,delim);
-	    token[1]=strtok(NULL,delim);
-
-	    // Respond to client:
-	    strcpy(server_message, token[0]);
-	    int command = atoi(token[1]);
-	    printf("command received %d\n", command);
 	    if(command==0){
 		    if (sendto(sock_descriptor, server_message, strlen(server_message), 0,
 		         (struct sockaddr*)&client_addr, client_struct_length) < 0){
@@ -74,14 +84,21 @@ int main(int argc, char* argv[]){
 		    }
 		}
 		else if(command>=1 && command<=5){
-			printf("sleeping for %d seconds\n",command );
-			sleep(command);
-			if (sendto(sock_descriptor, server_message, strlen(server_message), 0,
-		         (struct sockaddr*)&client_addr, client_struct_length) < 0){
-		        printf("Can't send\n");
-		        return -1;
-		    }
-		    printf("done sending message \n");
+
+			frk = fork();
+			if(frk==0){
+				printf("sleeping for %d seconds\n",command );
+				sleep(command);
+				if (sendto(sock_descriptor, server_message, strlen(server_message), 0,
+			         (struct sockaddr*)&client_addr, client_struct_length) < 0){
+			        printf("Can't send\n");
+			        return -1;
+			    }
+			    printf("done sending message \n");
+			}
+			else{
+				waitpid(frk, &status, 0);
+			}
 		}
 		else if(command==99)
 			exit(1);
