@@ -65,7 +65,8 @@ void term_prog (int sig) {
 	if(count_timer==0)
 	{
 		printf("Repeated the request thrice, terminating Client Request Process \n");
-    	kill (0,SIGTERM);
+		close_socket();
+		// closing the existing connection on terminating the request.
 	}
     else{
     	
@@ -92,7 +93,7 @@ void term_prog (int sig) {
 
 
 int main(int argc, char* argv[]){
-	count_timer=3;
+	
 	flag = false;
 
 	
@@ -107,35 +108,39 @@ int main(int argc, char* argv[]){
 	prt[0] = argv[2];
 
 	// getting input from client
+	while(1){
 
-	printf("Enter the command  : ");
-    bzero(buff, sizeof(buff));
-    fgets(buff, MAX, stdin);
-    buff[strlen(buff)-1]='\0';
+		count_timer=3;
+		printf("Enter the command  : ");
+	    bzero(buff, sizeof(buff));
+	    fgets(buff, MAX, stdin);
+	    buff[strlen(buff)-1]='\0';
 
 
-	
-	printf("Client Connection Starts\n");
-	initiate_socket();
-    connect_to_socket();
-   
-   
-   	
-    
+		
+		printf("Client Connection Starts\n");
+		initiate_socket();
+	    connect_to_socket();
+	   
+	   
+	   	
+	    
 
-	bzero(output, sizeof(output));
-    write(sock_desc, buff, sizeof(buff));
-    printf("writing done \n");
+		bzero(output, sizeof(output));
+	    write(sock_desc, buff, sizeof(buff));
+	    printf("writing done \n");
 
-    signal(SIGALRM, term_prog);
-    alarm(2);
-   
-    read(sock_desc, output, sizeof(output));
-    close_socket();
-    if(strcmp(output,"")!=0)
-    {
-    	printf("From Server : %s\n", output);
-    	kill(0,SIGTERM);
-    }
+	    signal(SIGALRM, term_prog);
+	    alarm(2);
+	   
+	    read(sock_desc, output, sizeof(output));
+	    close_socket();
+	    if(strcmp(output,"")!=0)
+	    {
+	    	printf("From Server : %s\n", output);
+	    	// cancelling the alarm after recieving response
+	    	alarm(0);
+	    }
+	}
 
 }
