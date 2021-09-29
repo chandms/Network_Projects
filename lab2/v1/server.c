@@ -57,6 +57,8 @@ int main(int argc, char* argv[]){
     printf("%s\n", "binding done");
 
     while(1){
+    	printf("\n\n************************************\n");
+    	printf("server starting to connect to clients\n");
 
     	
     	memset(server_message, '\0', sizeof(server_message));
