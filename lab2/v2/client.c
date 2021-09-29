@@ -137,9 +137,10 @@ int main(int argc, char* argv[]){
 	    close_socket();
 	    if(strcmp(output,"")!=0)
 	    {
-	    	printf("From Server : %s\n", output);
 	    	// cancelling the alarm after recieving response
 	    	alarm(0);
+	    	printf("From Server : %s\n", output);
+	    	
 	    }
 	}
 
