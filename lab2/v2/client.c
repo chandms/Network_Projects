@@ -49,9 +49,7 @@ void connect_to_socket(){
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = inet_addr(ipc[0]);
     servaddr.sin_port = htons(atoi(prt[0]));
-   
-
-    // connect the client socket to server socket
+  
     if (connect(sock_desc, (SA*)&servaddr, sizeof(servaddr)) != 0) {
         printf("connection with the server failed...\n");
         exit(0);
@@ -60,18 +58,13 @@ void connect_to_socket(){
         printf("connected to the server..\n");
 }
 
-void establish_connection_with_server(){
-	close_socket();
-	initiate_socket();
-	connect_to_socket();
-}
-
 
 void term_prog (int sig) {
+	printf("\n\n\n********************************\n");
 	printf("didn't recieve the response from server\n");
 	if(count_timer==0)
 	{
-		printf("Terminating Client Request Process \n");
+		printf("Repeated the request thrice, terminating Client Request Process \n");
     	kill (0,SIGTERM);
 	}
     else{
@@ -79,6 +72,15 @@ void term_prog (int sig) {
     	printf("counter timer = %d\n",count_timer );
     	count_timer--;
     	close_socket();
+    	initiate_socket();
+    	connect_to_socket();
+
+    	bzero(output, sizeof(output));
+	    write(sock_desc, buff, sizeof(buff));
+	    printf("writing done \n");
+
+    	signal(SIGALRM, term_prog);
+    	alarm(2);
 
 
     	
@@ -104,45 +106,36 @@ int main(int argc, char* argv[]){
 	ipc[0] = argv[1];
 	prt[0] = argv[2];
 
+	// getting input from client
+
 	printf("Enter the command  : ");
     bzero(buff, sizeof(buff));
     fgets(buff, MAX, stdin);
     buff[strlen(buff)-1]='\0';
 
 
-	while(1){
-		printf("Client Connection Starts\n");
-		initiate_socket();
-	    connect_to_socket();
+	
+	printf("Client Connection Starts\n");
+	initiate_socket();
+    connect_to_socket();
+   
+   
+   	
+    
 
-		//establish_connection_with_server();
-	   
-	    // getting input from client
-	   	
-	    
+	bzero(output, sizeof(output));
+    write(sock_desc, buff, sizeof(buff));
+    printf("writing done \n");
 
-		bzero(output, sizeof(output));
-	    //signal(SIGALRM, term_prog);
-	   
-	    write(sock_desc, buff, sizeof(buff));
-	    printf("writing done \n");
+    signal(SIGALRM, term_prog);
+    alarm(2);
+   
+    read(sock_desc, output, sizeof(output));
+    close_socket();
+    if(strcmp(output,"")!=0)
+    {
+    	printf("From Server : %s\n", output);
+    	kill(0,SIGTERM);
+    }
 
-	    struct sigaction action;
-  		action.sa_handler = term_prog;
-  		action.sa_flags = SA_RESTART; //<-- restart 
-  		sigaction(SIGALRM, &action, NULL);
-	    alarm(2);
-
-	    read(sock_desc, output, sizeof(output));
-	    
-	    close_socket();
-	    if(strcmp(output,"")!=0)
-	    {
-	    	printf("hi From Server : %s\n", output);
-	    	kill(0,SIGTERM);
-	    }
-
-	    printf("********************************\n\n\n");
-	    //kill (0,SIGTERM);
-	}
 }

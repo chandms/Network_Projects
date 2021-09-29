@@ -133,8 +133,14 @@ int main(int argc, char *argv[]){
 	    
 	    time_t t;
 	    srand((unsigned) time(&t));
-	    int toss_val = rand()%2;
-	    //int toss_val =0;
+	    int toss_val = rand()%10;
+	    printf("toss = %d\n",toss_val);
+
+	    if(toss_val>=5)
+	    	toss_val=1;
+	    else
+	    	toss_val=0;
+	    //toss_val =0;
 	    printf("value of toss is = %d\n",toss_val);
 
 	    // head comes
