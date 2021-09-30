@@ -46,8 +46,8 @@ int main(int argc, char* argv[]){
 
     int sock_descriptor;
 	char server_message[BUF_SIZE];
-	struct sockaddr_in server_addr;
-	socklen_t server_struct_length;
+	struct sockaddr_in server_addr,client_addr;
+	socklen_t server_struct_length, client_struct_length;
 	int port;
 
 	fp = fopen("pingparam.dat","r");
@@ -69,16 +69,28 @@ int main(int argc, char* argv[]){
 
     memset(&server_addr, 0, sizeof(server_addr));
 
-    
+    client_struct_length = sizeof(client_addr);
+
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = inet_addr(argv[2]);
+
+    client_addr.sin_family = AF_INET;
+    client_addr.sin_port = 0;
+    client_addr.sin_addr.s_addr = inet_addr(argv[1]);
+
+    if(bind(sock_descriptor, (struct sockaddr*)&client_addr, client_struct_length) < 0){
+        printf("Couldn't bind to the port\n");
+        return -1;
+    }
+    else
+    	printf("client binding done\n");
     
 
 	
 
 	while ((read = getline(&line, &len, fp)) != -1) {
-		
+
         token[0]=strtok(line,delim);
         lc=0;
         while(lc<4){
@@ -140,10 +152,10 @@ int main(int argc, char* argv[]){
 		        return -1;
 		    }
 
-		    if(lc+1==n){
-		    	// cancelling the previous alarm if obtained the output
-		    	alarm(0);
-		    }
+		    // if(lc+1==n){
+		    // 	// cancelling the previous alarm if obtained the output
+		    // 	alarm(0);
+		    // }
 
 		    s++;
 		    time2 = time(NULL);
@@ -163,6 +175,8 @@ int main(int argc, char* argv[]){
 		    	sleep(t);
 		    }
 	    }
+
+	    break;
 
 
 

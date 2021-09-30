@@ -77,6 +77,8 @@ int main(int argc, char* argv[]){
 	    printf("Message from client = %d\n",myInt1 );
 	    uint32_t command = client_message[4];
 	    printf("Obtained command = %d\n", command);
+
+	    sprintf(server_message, "%d", myInt1);
 	    
 	    if(command==0){
 		    if (sendto(sock_descriptor, server_message, strlen(server_message), 0,
@@ -102,8 +104,11 @@ int main(int argc, char* argv[]){
 				waitpid(frk, &status, 0);
 			}
 		}
-		else if(command==99)
+		else if(command==99){
+			close(sock_descriptor);
+			printf("server exiting \n");
 			exit(1);
+		}
 
 	}
     
