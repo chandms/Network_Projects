@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 #include <time.h>
 #include<signal.h>
+#include <sys/time.h>
 
 #define BUF_SIZE 1000
 
@@ -127,9 +128,9 @@ int main(int argc, char* argv[]){
 			
 	    	memset(server_message, '\0', sizeof(server_message));
 	    	
-
-	    	
-	    	time1 = time(NULL);
+	    	struct timeval current_time;
+	    	gettimeofday(&current_time, NULL);
+	    	time1 = current_time.tv_sec;
 	    	printf("time1 %ld\n", time1);
 	    	// Send the message to server:
 	    	// 
@@ -158,7 +159,8 @@ int main(int argc, char* argv[]){
 		    // }
 
 		    s++;
-		    time2 = time(NULL);
+		    gettimeofday(&current_time, NULL);
+	    	time2 = current_time.tv_sec;
 	    	printf("time2 %ld\n", time2);
 
 	    	int diff = (time2-time1)*1000;
