@@ -28,7 +28,7 @@ int security_check(struct sockaddr_in cliaddr, char buf[MAX]){
 		tk[i]=strtok(NULL,dm);
 	}
 
-	if(!(strcmp(tk[0],"127")==0 && strcmp(tk[1],"0")==0 && (strcmp(tk[2],"0")==0 || strcmp(tk[2],"1")==0)))
+	if(!(strcmp(tk[0],"128")==0 && strcmp(tk[1],"10")==0 && (strcmp(tk[2],"25")==0 || strcmp(tk[2],"112")==0)))
 	{
 		printf("ip address invalid \n");
 		return -1;
