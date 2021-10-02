@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/time.h>
 
 union
 {
@@ -73,10 +74,14 @@ int main(int argc, char* argv[]){
 	           inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 
 	    // Converting byte to int 
+	    struct timeval current_time;
+	    gettimeofday(&current_time, NULL);
+    	time_t time2 = current_time.tv_sec;
+
 		uint32_t myInt1 = client_message[0] + (client_message[1] << 8) + (client_message[2] << 16) + (client_message[3] << 24);
 	    printf("Message from client = %d\n",myInt1 );
 	    uint32_t command = client_message[4];
-	    printf("Obtained command = %d\n", command);
+	    printf("Obtained command = %d , at time = %ld\n", command,time2*1000000+current_time.tv_usec);
 
 	    sprintf(server_message, "%d", myInt1);
 	    
@@ -102,10 +107,10 @@ int main(int argc, char* argv[]){
 			}
 			else{
 				waitpid(frk, &status, 0);
+				exit(1);
 			}
 		}
 		else if(command==99){
-			close(sock_descriptor);
 			printf("server exiting \n");
 			exit(1);
 		}
