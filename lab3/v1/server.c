@@ -12,6 +12,7 @@
 #define CLREQ 10
 #define SA struct sockaddr
 
+// integer byte converter
 
 union
 {
@@ -125,6 +126,7 @@ int main(int argc, char *argv[]){
         	// read the message from client and copy it in buffer
         read(connfd, buff, sizeof(buff));
 
+        // decoding back the secret key
         int sec_key_recv = (buff[1]<<8)+buff[0];
 
         if(secrect_key!=sec_key_recv){
@@ -132,6 +134,7 @@ int main(int argc, char *argv[]){
         	continue;
         }
 
+        // decoding the filename
         char fname_recv[8];
         int cn=0;
         for(int u=2;u<CLREQ;u++){
@@ -139,10 +142,11 @@ int main(int argc, char *argv[]){
         	cn++;
         }
 
+
         printf("Received Message From Client - %d, %s\n",sec_key_recv,fname_recv);
 
 
-
+        // ip address check
 	    int res = ip_address_check(cliaddr);
 	    if(res==-1){
 	    	printf("Server can't process unsecured request\n");
@@ -159,7 +163,7 @@ int main(int argc, char *argv[]){
 	    	toss_val=1;
 	    else
 	    	toss_val=0;
-	    //toss_val=0;
+	    toss_val=1;
 	    // head comes
 	    if(toss_val==0){
 	    	printf("Head came up, ignoring this request \n");
@@ -177,13 +181,17 @@ int main(int argc, char *argv[]){
 		    		continue;
 		    	}
 		    	
+		    	// if all other checks are successful, then forking a child to process the file
 		    	frk = fork();
 		    	
 		    	
 		    	if(frk==0){
 
-		    		char buffer[block_size];
+
 			    	while (1) {
+			    		char buffer[block_size];
+		    			bzero(&buffer, sizeof(buffer));
+		    			// reading file
 				        ssize_t read_return = fread(buffer, (size_t)1, (size_t) block_size, fp);
 				        
 				        
@@ -192,7 +200,8 @@ int main(int argc, char *argv[]){
 				            exit(EXIT_FAILURE);
 				        }
 				        
-
+				        buffer[strlen(buffer)-1]='\0';
+				        // server writes the read portion in socket
 				        if (write(connfd, buffer, read_return) == -1) {
 				            perror("error while writing");
 				            exit(EXIT_FAILURE);

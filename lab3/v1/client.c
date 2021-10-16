@@ -15,6 +15,7 @@
 
 #define SA struct sockaddr
 
+// interger byte conversion
 union
 {
     uint32_t integer;
@@ -28,7 +29,11 @@ char* ip_address;
 int sock_desc;
 struct sockaddr_in servaddr, cliaddr;
 unsigned char req_buffer[10];
+int secret_key;
+char* filename;
+int count_timer=3; // the client can send the request at max 3 times
 
+// initiate the socket
 void initiate_socket(){
 	 sock_desc = socket(AF_INET, SOCK_STREAM, 0);
 	    if (sock_desc == -1) {
@@ -39,10 +44,12 @@ void initiate_socket(){
 	        printf("Socket successfully created..\n");
 }
 
+// close the socket
 void close_socket(){
 	close(sock_desc);
 }
 
+// connect to server
 void connect_to_socket(){
 	bzero(&servaddr, sizeof(servaddr));
 	   
@@ -59,13 +66,14 @@ void connect_to_socket(){
         printf("connected to the server..\n");
 }
 
-int count_timer=3;
 
+// signal handler function 
 void term_prog (int sig) {
 	printf("\n\n\n********************************\n");
 	printf("didn't recieve the response from server\n");
 	if(count_timer==0)
 	{
+		// if the client loses all 3 attempts of resending requests.
 		printf("Repeated the request thrice, terminating Client Request Process \n");
 		close_socket();
 		// closing the existing connection on terminating the request.
@@ -73,15 +81,19 @@ void term_prog (int sig) {
     else{
     	
     	printf("counter timer = %d\n",count_timer );
+
+    	// decreasing the counter each time after resending request.
     	count_timer--;
+
     	close_socket();
     	initiate_socket();
     	connect_to_socket();
 
 	    write(sock_desc,req_buffer,sizeof(req_buffer));
-	    printf("writing done \n");
+	    printf("Client sent the request again to server - %d,%s\n\n",secret_key,filename );
 
     	signal(SIGALRM, term_prog);
+    	// reset the alarm
     	alarm(2);
 
 
@@ -107,15 +119,12 @@ int main(int argc, char* argv[]){
 	ip_address = argv[1];
 	port = argv[2];
 	int block_size = atoi(argv[5]);
-	int secret_key = atoi(argv[4]);
-	char* filename = argv[3];
+	secret_key = atoi(argv[4]);
+	filename = argv[3];
 
 	ssize_t read_return;
 
-	
-
-
-	
+	// converting the secret key to 2 bytes
 	conv.integer = secret_key;
 
 	int u=0;
@@ -123,20 +132,23 @@ int main(int argc, char* argv[]){
 		req_buffer[u]=conv.byte[u];
 	
 	
+	// converting the filename to unsigned chars
 	for(u=0;u<strlen(filename);u++)
 	{
 		
 		req_buffer[2+u]=(unsigned char)filename[u];
 	}
 
+	// forming the 10 bytes request
 	for(int y=(2+u);y<10;y++)
 		req_buffer[y]=(unsigned char)'\0';
 
-	for(u=0;u<10;u++)
-		printf("%x\n",req_buffer[u] );
+	
 
 
 	if(count_timer>0){
+
+		// establishing the connection with server
 		initiate_socket();
 		connect_to_socket();
 
@@ -149,12 +161,16 @@ int main(int argc, char* argv[]){
 		struct timeval current_time;
 		gettimeofday(&current_time, NULL);
 		time_t time1 = current_time.tv_sec*1000000+current_time.tv_usec;
+
+		FILE * fptr = fopen("file_received_by_client.txt","w");
+		signal(SIGALRM, term_prog);
+
+	   	// set alarm
+	   	alarm(2);
 	   	while(1) {
 
 	   		char buffer[block_size];
 	   		bzero(&buffer, sizeof(buffer));
-	   		signal(SIGALRM, term_prog);
-	   		alarm(2);
 	        read_return = read(sock_desc, buffer, block_size);
 
 	        if(read_return==0)
@@ -165,22 +181,27 @@ int main(int argc, char* argv[]){
 	        else
 	        {
 	        	alarm(0);
-	        	fg=1;
-	        	total_file_size+=read_return;
+	        	fg=1; // flag to denote if the client received any response from server
+
+	        	total_file_size+=read_return; // summing up file_size
+	        	fprintf(fptr,"%s",buffer);
 
 	        }
-	        printf("%s\n",buffer );
-	        printf("************************\n");
+	        
 	    } 
+	    fclose(fptr);
 	    gettimeofday(&current_time, NULL);
 		time_t time2 = current_time.tv_sec*1000000+current_time.tv_usec;
 
 		if(fg==1){
 			alarm(0);
+			printf("client received the response \n");
+			printf("starting time %ld\n", time1 );
+			printf("ending time %ld\n", time2 );
 			printf("total_file_size = %d\n",total_file_size );
-		    int completion_time = (time2-time1)/1000;
+		    float completion_time = (float)(time2-time1)/1000.00;
 
-		    printf("Completion Time = %d ms\n", completion_time );
+		    printf("Completion Time = %f ms\n", completion_time );
 		    printf("Throughput = %f byte/ms \n",(float)total_file_size/completion_time );
 		}
 
