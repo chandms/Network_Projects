@@ -121,6 +121,8 @@ int main(int argc, char* argv[]){
 	int block_size = atoi(argv[5]);
 	secret_key = atoi(argv[4]);
 	filename = argv[3];
+	struct timeval current_time;
+	time_t time1,time2;
 
 	ssize_t read_return;
 
@@ -158,11 +160,13 @@ int main(int argc, char* argv[]){
 		bool fg=0;
 		int total_file_size=0;
 
-		struct timeval current_time;
-		gettimeofday(&current_time, NULL);
-		time_t time1 = current_time.tv_sec*1000000+current_time.tv_usec;
+		char path_to_file[100];
+		getcwd(path_to_file, sizeof(path_to_file));
+		strcat(path_to_file,"/Client/");
+		strcat(path_to_file,filename);
 
-		FILE * fptr = fopen("file_received_by_client.txt","w");
+		
+		FILE * fptr;
 		signal(SIGALRM, term_prog);
 
 	   	// set alarm
@@ -181,6 +185,13 @@ int main(int argc, char* argv[]){
 	        else
 	        {
 	        	alarm(0);
+	        	if(fg==0){
+	        		fptr = fopen(path_to_file,"w");
+	        		// noting the time of first reply
+					gettimeofday(&current_time, NULL);
+					time1 = current_time.tv_sec*1000000+current_time.tv_usec;
+
+	        	}
 	        	fg=1; // flag to denote if the client received any response from server
 
 	        	total_file_size+=read_return; // summing up file_size
@@ -190,8 +201,9 @@ int main(int argc, char* argv[]){
 	        
 	    } 
 	    fclose(fptr);
+	    // noting the time of last reply
 	    gettimeofday(&current_time, NULL);
-		time_t time2 = current_time.tv_sec*1000000+current_time.tv_usec;
+		time2 = current_time.tv_sec*1000000+current_time.tv_usec;
 
 		if(fg==1){
 			alarm(0);
