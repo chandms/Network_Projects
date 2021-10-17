@@ -16,4 +16,4 @@
 		e. main() -> will prepare the message, send request to server, store the response file in "Client" directory within v1 folder.
 
 
-		Point to note : myftc will store the response file within Client directory in v1 folder.
+		Point to note : myftpc will store the response file within Client directory in v1 folder.
