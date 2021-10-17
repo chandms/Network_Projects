@@ -163,7 +163,6 @@ int main(int argc, char *argv[]){
 	    	toss_val=1;
 	    else
 	    	toss_val=0;
-	    toss_val=1;
 	    // head comes
 	    if(toss_val==0){
 	    	printf("Head came up, ignoring this request \n");
