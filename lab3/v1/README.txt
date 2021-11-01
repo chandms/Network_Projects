@@ -13,7 +13,8 @@
 		b. close_socket() -> to close socket connection
 		c. connect_to_socket() -> connect to the server
 		d. term_prog (int ) -> signal handler to resend request
-		e. main() -> will prepare the message, send request to server, store the response file in "Client" directory within v1 folder.
+		e. check_param() -> checks the command input provided by the user. checks the secret key and filename.
+		f. main() -> will prepare the message, send request to server, store the response file in "Client" directory within v1 folder.
 
 
 		Point to note : myftpc will store the response file within Client directory in v1 folder.

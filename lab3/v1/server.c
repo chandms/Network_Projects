@@ -20,6 +20,8 @@ union
     unsigned char byte[4];
 } conv;
 
+
+// ip_address check
 int ip_address_check(struct sockaddr_in cliaddr){
 
 	char* ip = inet_ntoa(cliaddr.sin_addr);
@@ -33,17 +35,12 @@ int ip_address_check(struct sockaddr_in cliaddr){
 		i++;
 		tk[i]=strtok(NULL,dm);
 	}
-
-	// if(!(strcmp(tk[0],"128")==0 && strcmp(tk[1],"10")==0 && (strcmp(tk[2],"25")==0 || strcmp(tk[2],"112")==0)))
-	// {
-	// 	printf("ip address invalid \n");
-	// 	return -1;
-	// }
-
-	if(!(strcmp(tk[0],"127")==0 && strcmp(tk[1],"0")==0 && (strcmp(tk[2],"0")==0 || strcmp(tk[2],"1")==0)))
-	{
-		printf("ip address invalid \n");
-		return -1;
+	
+	// checking ip address
+	 if(!(strcmp(tk[0],"128")==0 && strcmp(tk[1],"10")==0 && (strcmp(tk[2],"25")==0 || strcmp(tk[2],"112")==0)))
+	 {
+	 	printf("ip address invalid \n");
+	 	return -1;
 	}
 
 	printf("IP address check successful \n");
@@ -69,7 +66,7 @@ int main(int argc, char *argv[]){
 	int socket_desc, connfd;
 	socklen_t len;
     struct sockaddr_in servaddr, cliaddr;
-    unsigned char buff[CLREQ];
+    unsigned char buff[CLREQ]; // response buffer
     
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_desc == -1) {

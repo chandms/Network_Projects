@@ -104,6 +104,39 @@ void term_prog (int sig) {
 }
 
 
+// checks argument provided by client
+// returns 0 if success
+// return -1 if not
+int check_param(){
+	
+	// checks the secret key if it is in valid range
+	 if(secret_key<0 || secret_key>65535){
+	 	printf("secret key is not in range\n");
+	 	return -1;
+	 }
+	 
+	
+	 int count_of_dots=0; // only one dot is valid
+	 for(int i=0;i<strlen(filename);i++){
+	 
+	 	 // checks if the filename has only alphabets
+	 	if((filename[i]>='A' && filename[i]<='Z') || (filename[i]>='a' && filename[i]<='z'))
+	 		continue;
+	 	else if(filename[i]=='.' && count_of_dots==0){
+	 		count_of_dots=1;
+	 	}
+	 	else
+	 	{
+	 		printf("filename is not proper as specification\n");
+	 		return -1;
+	 	}
+	 
+	 }
+	 // if all successful
+	return 0;
+}
+
+
 
 int main(int argc, char* argv[]){
 
@@ -128,6 +161,11 @@ int main(int argc, char* argv[]){
 
 	// converting the secret key to 2 bytes
 	conv.integer = secret_key;
+	
+	if(check_param()==-1)
+	{
+		exit(1);
+	}
 
 	int u=0;
 	for(u=0;u<2;u++)
@@ -200,12 +238,13 @@ int main(int argc, char* argv[]){
 	        }
 	        
 	    } 
-	    fclose(fptr);
+	    
 	    // noting the time of last reply
 	    gettimeofday(&current_time, NULL);
 		time2 = current_time.tv_sec*1000000+current_time.tv_usec;
 
 		if(fg==1){
+			fclose(fptr);
 			alarm(0);
 			printf("client received the response \n");
 			printf("starting time %ld\n", time1 );
@@ -216,6 +255,7 @@ int main(int argc, char* argv[]){
 		    printf("Completion Time = %f ms\n", completion_time );
 		    printf("Throughput = %f byte/ms \n",(float)total_file_size/completion_time );
 		}
+
 
 		close_socket();
 	}
