@@ -375,13 +375,16 @@ int main(int argc, char* argv[]){
 		        	int padding =0;
 		        	if(read_return==(block_size+2))
 		        	{
+		        		printf("coming here \n");
 		        		char f = (char) buffer[block_size+1];
+		        		printf("%x, %c\n",buffer[block_size+1], f);
 		        		unsigned int fi = ( unsigned int)f;
+		        		printf("%u\n",fi );
 		        		unsigned int ob = bbdecode(secret_key, fi);
 		        		padding = ob;
-
+		        		printf("%u\n", padding);
 		        		int y=read_return-3;
-		        		while(y>=0 && (unsigned int)server_msg[y]==secret_key){
+		        		while(y>=0 && server_msg[y]==f){
 		        			server_msg[y]='\0';
 		        			y--;
 		        		}
@@ -403,7 +406,7 @@ int main(int argc, char* argv[]){
 		        	printf("***************************************\n");
 		        	
 		        	
-		        	if(read_return<block_size || (read_return==block_size+2 && padding==9))
+		        	if(read_return<block_size || (read_return==block_size+2))
 		        	{
 		        		end_of_the_file=1;
 		        	}

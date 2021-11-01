@@ -104,7 +104,7 @@ void send_file_info_to_client(){
 	        }
 
 	       
-        	com.integer = bbencode( 9, pub_key); //dummy padding
+        	com.integer = bbencode( 0, pub_key); //dummy padding
         	last_pack[block_size+1]= com.byte[0];
 
 
@@ -421,9 +421,6 @@ int main(int argc, char *argv[]){
 	    //	continue;
 	    //}
 
-
-
-        //sleep(7);
     	pid_t frk;
     	int status;
     	
